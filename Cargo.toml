@@ -47,7 +47,7 @@ tempfile = "3.8"
 
 # LSP Support
 tower-lsp = "0.20"
-lsp-types = "0.95.0"
+lsp-types = "0.97.0"
 
 # Syntax Highlighting
 tree-sitter = "0.20"
