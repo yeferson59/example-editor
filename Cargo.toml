@@ -21,7 +21,7 @@ keywords = ["editor", "text-editor", "rust"]
 [workspace.dependencies]
 # GUI Framework
 egui = "0.23"
-eframe = "0.23"
+eframe = "0.31"
 
 # Async runtime
 tokio = { version = "1.34", features = ["full"] }
