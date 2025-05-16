@@ -65,7 +65,7 @@ lazy_static = "1.4"
 
 # WASM support
 wasmer = "4.2"
-wasmer-compiler = "4.2"
+wasmer-compiler = "6.0"
 wasmer-compiler-cranelift = "4.2"
 wasmer-types = "4.2"
 
