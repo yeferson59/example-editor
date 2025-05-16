@@ -67,7 +67,7 @@ lazy_static = "1.4"
 wasmer = "4.2"
 wasmer-compiler = "4.2"
 wasmer-compiler-cranelift = "4.2"
-wasmer-types = "4.2"
+wasmer-types = "6.0"
 
 # Resource limits
 rlimit = "0.9"
