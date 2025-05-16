@@ -1,0 +1,174 @@
+# Rust Editor Configuration Example
+
+[editor]
+# Editor appearance
+theme = "dark"
+font = "JetBrains Mono"
+font_size = 14
+line_numbers = true
+relative_line_numbers = false
+minimap = true
+smooth_scrolling = true
+cursor_style = "block"  # block, line, underline
+
+# Editor behavior
+tab_size = 4
+insert_spaces = true
+word_wrap = true
+auto_indent = true
+trim_trailing_whitespace = true
+ensure_final_newline = true
+scroll_past_end = true
+
+# File handling
+auto_save = true
+auto_save_interval = 300  # seconds
+backup_files = true
+backup_dir = "~/.local/share/rust-editor/backups"
+
+[ui]
+# UI components
+status_bar = true
+file_tree = true
+minimap = true
+command_palette = true
+tab_bar = true
+
+# UI customization
+toolbar = true
+toolbar_position = "top"  # top, bottom
+side_panel_position = "left"  # left, right
+panel_width = 250
+
+[search]
+# Search settings
+case_sensitive = false
+whole_word = false
+regex = false
+include_hidden = false
+max_results = 1000
+
+[git]
+# Git integration
+git_gutter = true
+git_blame = true
+git_status_in_tree = true
+
+[terminal]
+# Integrated terminal
+enable = true
+shell = "bash"
+working_directory = "current"  # current, home
+scroll_back_lines = 10000
+
+[debug]
+# Debugging features
+enable = true
+breakpoint_style = "circle"  # circle, line
+variable_tooltips = true
+inline_values = true
+
+[plugins]
+# Plugin settings
+auto_update = true
+allowed_urls = ["https://plugins.rust-editor.dev"]
+install_dir = "~/.local/share/rust-editor/plugins"
+
+[language.default]
+# Default language settings
+formatter = ""
+format_on_save = false
+auto_complete = true
+snippets = true
+diagnostics = true
+
+[language.rust]
+formatter = "rustfmt"
+format_on_save = true
+lsp = "rust-analyzer"
+auto_import = true
+inlay_hints = true
+
+[language.python]
+formatter = "black"
+format_on_save = true
+lsp = "pyright"
+line_length = 88
+auto_venv = true
+
+[language.javascript]
+formatter = "prettier"
+format_on_save = true
+lsp = "typescript-language-server"
+semi = false
+single_quote = true
+
+[keybindings]
+# File operations
+"ctrl+s" = "save"
+"ctrl+shift+s" = "save_as"
+"ctrl+o" = "open"
+"ctrl+n" = "new_file"
+"ctrl+w" = "close"
+"ctrl+shift+w" = "close_all"
+
+# Edit operations
+"ctrl+z" = "undo"
+"ctrl+shift+z" = "redo"
+"ctrl+x" = "cut"
+"ctrl+c" = "copy"
+"ctrl+v" = "paste"
+"ctrl+a" = "select_all"
+"ctrl+f" = "find"
+"ctrl+h" = "replace"
+"ctrl+d" = "duplicate_line"
+"ctrl+/" = "toggle_comment"
+
+# View operations
+"ctrl+p" = "command_palette"
+"ctrl+b" = "toggle_sidebar"
+"ctrl+shift+e" = "toggle_explorer"
+"ctrl+shift+f" = "global_search"
+"ctrl+`" = "toggle_terminal"
+"ctrl+\\" = "split_editor"
+
+# Navigation
+"ctrl+g" = "goto_line"
+"ctrl+shift+o" = "goto_symbol"
+"f12" = "goto_definition"
+"alt+left" = "navigate_back"
+"alt+right" = "navigate_forward"
+
+# Multiple cursors
+"ctrl+alt+up" = "add_cursor_above"
+"ctrl+alt+down" = "add_cursor_below"
+"ctrl+l" = "select_line"
+"ctrl+shift+l" = "select_all_occurrences"
+
+[theme]
+# Theme colors
+name = "Dark Modern"
+dark = true
+
+[theme.colors]
+background = "#1e1e1e"
+foreground = "#d4d4d4"
+selection = "#264f78"
+cursor = "#ffffff"
+line_numbers = "#858585"
+current_line = "#282828"
+matching_bracket = "#646464"
+search_result = "#613214"
+word_highlight = "#575757"
+
+[theme.syntax]
+keyword = "#569cd6"
+string = "#ce9178"
+number = "#b5cea8"
+comment = "#6a9955"
+function = "#dcdcaa"
+type = "#4ec9b0"
+variable = "#9cdcfe"
+constant = "#4fc1ff"
+operator = "#d4d4d4"
+parameter = "#9cdcfe"

@@ -1,0 +1,11 @@
+{
+    "name": "hello-world",
+    "version": "0.1.0",
+    "description": "A simple hello world plugin",
+    "author": "Your Name",
+    "license": "MIT",
+    "entry_point": "lib",
+    "plugin_type": "Native",
+    "dependencies": [],
+    "permissions": []
+}

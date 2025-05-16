@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        rust: [stable, beta]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Rust ${{ matrix.rust }}
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        override: true
+        components: rustfmt, clippy
+
+    - name: Install Dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libx11-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
+
+    - name: Build
+      run: cargo build --verbose
+
+    - name: Run tests
+      run: cargo test --verbose
+
+    - name: Run clippy
+      run: cargo clippy -- -D warnings
+
+    - name: Check formatting
+      run: cargo fmt -- --check
+
+  coverage:
+    name: Code coverage
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+        components: llvm-tools-preview
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libx11-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
+
+    - name: Install cargo-llvm-cov
+      uses: taiki-e/install-action@cargo-llvm-cov
+
+    - name: Generate code coverage
+      run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: lcov.info
+        fail_ci_if_error: true
+
+  release:
+    name: Release
+    needs: [test, coverage]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            suffix: ""
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            suffix: ".exe"
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            suffix: ""
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+        target: ${{ matrix.target }}
+
+    - name: Install Dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libx11-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
+
+    - name: Build Release
+      run: cargo build --release --target ${{ matrix.target }}
+
+    - name: Package Release
+      run: |
+        cd target/${{ matrix.target }}/release
+        tar czf ../../../rust-editor-${{ matrix.target }}.tar.gz rust-editor${{ matrix.suffix }}
+        cd ../../..
+
+    - name: Upload Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: rust-editor-${{ matrix.target }}.tar.gz

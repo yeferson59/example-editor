@@ -1,0 +1,119 @@
+# Default editor configuration
+
+[editor]
+theme = "dark"
+font = "JetBrains Mono"
+font_size = 14
+line_numbers = true
+tab_size = 4
+insert_spaces = true
+auto_indent = true
+word_wrap = true
+show_whitespace = false
+highlight_current_line = true
+smooth_scrolling = true
+auto_save = true
+auto_save_interval = 300  # seconds
+
+[ui]
+command_palette = true
+minimap = true
+status_line = true
+file_tree = true
+tab_bar = true
+cursor_style = "block"  # block, bar, underline
+cursor_blink = true
+
+[keybindings]
+# File operations
+"ctrl+s" = "save"
+"ctrl+shift+s" = "save_as"
+"ctrl+o" = "open"
+"ctrl+n" = "new"
+"ctrl+w" = "close"
+"ctrl+shift+w" = "close_all"
+
+# Edit operations
+"ctrl+z" = "undo"
+"ctrl+shift+z" = "redo"
+"ctrl+x" = "cut"
+"ctrl+c" = "copy"
+"ctrl+v" = "paste"
+"ctrl+a" = "select_all"
+"ctrl+f" = "find"
+"ctrl+h" = "replace"
+
+# View operations
+"ctrl+p" = "command_palette"
+"ctrl+b" = "toggle_sidebar"
+"ctrl+shift+m" = "toggle_minimap"
+"ctrl+shift+e" = "toggle_explorer"
+"ctrl+shift+f" = "global_search"
+
+# Navigation
+"ctrl+g" = "goto_line"
+"ctrl+shift+o" = "goto_symbol"
+"f12" = "goto_definition"
+"alt+left" = "navigate_back"
+"alt+right" = "navigate_forward"
+
+[language]
+# Default language settings
+[language.default]
+formatter = ""
+auto_format = false
+format_on_save = false
+word_separators = "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?"
+
+# Rust-specific settings
+[language.rust]
+formatter = "rustfmt"
+auto_format = true
+format_on_save = true
+lsp = "rust-analyzer"
+
+# Python-specific settings
+[language.python]
+formatter = "black"
+auto_format = true
+format_on_save = true
+lsp = "pylsp"
+
+# JavaScript/TypeScript settings
+[language.javascript]
+formatter = "prettier"
+auto_format = true
+format_on_save = true
+lsp = "typescript-language-server"
+
+[language.typescript]
+formatter = "prettier"
+auto_format = true
+format_on_save = true
+lsp = "typescript-language-server"
+
+[theme]
+# Theme customization
+background = "#282c34"
+foreground = "#abb2bf"
+selection = "#3e4451"
+cursor = "#528bff"
+line_numbers = "#495162"
+comment = "#5c6370"
+keyword = "#c678dd"
+string = "#98c379"
+number = "#d19a66"
+function = "#61afef"
+type = "#e5c07b"
+constant = "#d19a66"
+operator = "#56b6c2"
+error = "#e06c75"
+warning = "#e5c07b"
+info = "#61afef"
+hint = "#98c379"
+
+[plugin]
+# Plugin configuration
+enabled = true
+auto_update = true
+safe_mode = true

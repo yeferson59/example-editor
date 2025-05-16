@@ -1,0 +1,47 @@
+[package]
+name = "editor-plugin"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Plugin system for rust-editor"
+
+[dependencies]
+# Local dependencies
+editor-core = { path = "../editor-core" }
+
+# Plugin loading and sandboxing
+libloading = "0.8"
+
+# WASM execution
+wasmer = { workspace = true }
+wasmer-compiler = { workspace = true }
+wasmer-compiler-cranelift = { workspace = true }
+wasmer-types = { workspace = true }
+
+# Resource limits
+rlimit = { workspace = true }
+
+# Async runtime
+tokio = { workspace = true }
+futures = { workspace = true }
+async-trait = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Logging
+log = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+# Windows-specific sandbox implementation - placeholder
+
+[dev-dependencies]
+env_logger = { workspace = true }
+tempfile = { workspace = true }

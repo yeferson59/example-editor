@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+      - cargo-cache:/usr/local/cargo/registry
+      - target-cache:/workspace/target
+    environment:
+      - RUST_LOG=debug
+      - RUST_BACKTRACE=1
+    ports:
+      - "3000:3000"  # For development server
+    command: ./scripts/dev.sh run
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+      - cargo-cache:/usr/local/cargo/registry
+      - target-cache:/workspace/target
+    command: ./scripts/dev.sh test --all
+
+volumes:
+  cargo-cache:
+  target-cache:

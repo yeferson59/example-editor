@@ -1,0 +1,18 @@
+{
+    "name": "file-stats",
+    "version": "0.1.0",
+    "description": "File and directory statistics plugin",
+    "author": "Your Name",
+    "license": "MIT",
+    "entry_point": "lib",
+    "plugin_type": "Native",
+    "dependencies": [],
+    "permissions": [
+        {
+            "FileSystem": {
+                "paths": ["/"],
+                "read_only": true
+            }
+        }
+    ]
+}

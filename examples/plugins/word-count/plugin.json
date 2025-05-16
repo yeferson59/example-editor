@@ -1,0 +1,11 @@
+{
+    "name": "word-count",
+    "version": "0.1.0",
+    "description": "Counts words in the current document",
+    "author": "Example Author",
+    "license": "MIT",
+    "entry_point": "lib",
+    "plugin_type": "Native",
+    "dependencies": [],
+    "permissions": []
+}

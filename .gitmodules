@@ -1,0 +1,3 @@
+[submodule "editor-core"]
+	path = editor-core
+	url = https://github.com/yeferson59/example-editor.git

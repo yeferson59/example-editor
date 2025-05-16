@@ -1,0 +1,41 @@
+[package]
+name = "editor-syntax"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository = "https://github.com/yefersontoloza/rust-editor"
+description = "Syntax highlighting and parsing for rust-editor"
+
+[dependencies]
+# Local dependencies
+editor-core = { path = "../editor-core" }
+
+# Syntax highlighting
+tree-sitter = { workspace = true }
+tree-sitter-rust = { workspace = true }
+tree-sitter-python = { workspace = true }
+tree-sitter-javascript = { workspace = true }
+tree-sitter-typescript = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# Concurrency & utilities
+lazy_static = { workspace = true }
+parking_lot = { workspace = true }
+
+# Async runtime
+tokio = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Logging
+log = { workspace = true }
+
+[dev-dependencies]
+env_logger = { workspace = true }
+tokio = { workspace = true, features = ["test-util"] }
