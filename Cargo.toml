@@ -42,7 +42,7 @@ ropey = "1.6"
 # Utility
 parking_lot = "0.12"
 log = "0.4"
-env_logger = "0.10"
+env_logger = "0.11"
 tempfile = "3.8"
 
 # LSP Support
