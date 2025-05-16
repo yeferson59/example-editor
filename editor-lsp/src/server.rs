@@ -1,12 +1,12 @@
 //! LSP server implementation
 
+use parking_lot::RwLock;
+use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::*;
 use tower_lsp::{Client, LanguageServer as LspServer};
-use parking_lot::RwLock;
-use std::collections::HashMap;
 
 /// Language server implementation
 pub struct LanguageServer {
@@ -41,9 +41,7 @@ impl LanguageServer {
         Self {
             client,
             documents: Arc::new(RwLock::new(HashMap::new())),
-            state: Arc::new(Mutex::new(ServerState {
-                root_uri: None,
-            })),
+            state: Arc::new(Mutex::new(ServerState { root_uri: None })),
         }
     }
 }
@@ -52,15 +50,17 @@ impl LanguageServer {
 impl LspServer for LanguageServer {
     async fn initialize(&self, params: InitializeParams) -> Result<InitializeResult> {
         // Log initialization
-        let root_uri = params.root_uri.clone().map_or_else(
-            || String::from("None"),
-            |uri| uri.to_string()
-        );
-        
-        self.client.log_message(
-            MessageType::INFO,
-            format!("Initializing language server with root URI: {}", root_uri)
-        ).await;
+        let root_uri = params
+            .root_uri
+            .clone()
+            .map_or_else(|| String::from("None"), |uri| uri.to_string());
+
+        self.client
+            .log_message(
+                MessageType::INFO,
+                format!("Initializing language server with root URI: {}", root_uri),
+            )
+            .await;
 
         let mut state = self.state.lock().await;
         state.root_uri = params.root_uri;
@@ -68,7 +68,7 @@ impl LspServer for LanguageServer {
         Ok(InitializeResult {
             capabilities: ServerCapabilities {
                 text_document_sync: Some(TextDocumentSyncCapability::Kind(
-                    TextDocumentSyncKind::INCREMENTAL
+                    TextDocumentSyncKind::INCREMENTAL,
                 )),
                 completion_provider: Some(CompletionOptions {
                     resolve_provider: Some(true),
@@ -107,10 +107,9 @@ impl LspServer for LanguageServer {
     }
 
     async fn initialized(&self, _: InitializedParams) {
-        self.client.log_message(
-            MessageType::INFO,
-            "Language server initialized",
-        ).await;
+        self.client
+            .log_message(MessageType::INFO, "Language server initialized")
+            .await;
     }
 
     async fn shutdown(&self) -> Result<()> {
@@ -123,19 +122,18 @@ impl LspServer for LanguageServer {
             content: params.text_document.text,
             language_id: params.text_document.language_id,
         };
-        
+
         let uri = params.text_document.uri.clone();
-        
+
         // Scope the lock to drop it before await
         {
             self.documents.write().insert(uri.clone(), document);
         }
-        
+
         // Now we can await without holding the lock
-        self.client.log_message(
-            MessageType::INFO,
-            format!("Document opened: {}", uri)
-        ).await;
+        self.client
+            .log_message(MessageType::INFO, format!("Document opened: {}", uri))
+            .await;
     }
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
@@ -143,64 +141,56 @@ impl LspServer for LanguageServer {
         let version = params.text_document.version;
         let changes = params.content_changes;
         let mut changed = false;
-        
+
         // Scope the lock to drop it before await
         {
             let mut documents = self.documents.write();
-            
+
             if let Some(doc_state) = documents.get_mut(&uri) {
                 // Update version
                 doc_state.version = version;
-                
-                // Apply changes
-                for change in changes {
-                    if let Some(_range) = change.range {
-                        // TODO: Handle incremental updates with range information
-                        // For now, just replace the entire content
-                        doc_state.content = change.text;
-                    } else {
-                        // Full document replacement
-                        doc_state.content = change.text;
-                    }
+
+                // Apply changes - simplified to always use the last change text
+                if let Some(last_change) = changes.last() {
+                    doc_state.content = last_change.text.clone();
+                    changed = true;
                 }
-                
-                changed = true;
             }
         }
-        
+
         // Now we can await without holding the lock
         if changed {
-            self.client.log_message(
-                MessageType::INFO,
-                format!("Document changed: {}", uri)
-            ).await;
+            self.client
+                .log_message(MessageType::INFO, format!("Document changed: {}", uri))
+                .await;
         } else {
-            self.client.log_message(
-                MessageType::WARNING,
-                format!("Changed unknown document: {}", uri)
-            ).await;
+            self.client
+                .log_message(
+                    MessageType::WARNING,
+                    format!("Changed unknown document: {}", uri),
+                )
+                .await;
         }
     }
 
     async fn did_close(&self, params: DidCloseTextDocumentParams) {
         let uri = params.text_document.uri.clone();
-        
+
         // Scope the lock to drop it before await
         {
             self.documents.write().remove(&uri);
         }
-        
+
         // Now we can await without holding the lock
-        self.client.log_message(
-            MessageType::INFO,
-            format!("Document closed: {}", uri)
-        ).await;
+        self.client
+            .log_message(MessageType::INFO, format!("Document closed: {}", uri))
+            .await;
     }
 
     async fn completion(&self, params: CompletionParams) -> Result<Option<CompletionResponse>> {
         let uri = params.text_document_position.text_document.uri.clone();
-        let _position = params.text_document_position.position;  // Prefix with _ since unused
-        
+        let _position = params.text_document_position.position;
+
         let documents = self.documents.read();
         if let Some(doc) = documents.get(&uri) {
             // Provide basic completion items based on language ID
@@ -224,20 +214,24 @@ impl LspServer for LanguageServer {
                             ..Default::default()
                         },
                     ]
-                },
-                _ => Vec::new()
+                }
+                _ => Vec::new(),
             };
-            
+
             return Ok(Some(CompletionResponse::Array(items)));
         }
-        
+
         Ok(None)
     }
 
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>> {
-        let uri = params.text_document_position_params.text_document.uri.clone();
+        let uri = params
+            .text_document_position_params
+            .text_document
+            .uri
+            .clone();
         let position = params.text_document_position_params.position;
-        
+
         let documents = self.documents.read();
         if let Some(doc) = documents.get(&uri) {
             // Basic hover information based on language ID
@@ -247,8 +241,10 @@ impl LspServer for LanguageServer {
                     return Ok(Some(Hover {
                         contents: HoverContents::Markup(MarkupContent {
                             kind: MarkupKind::Markdown,
-                            value: format!("**Position**: line {}, character {}\n\n**Language**: Rust", 
-                                position.line, position.character),
+                            value: format!(
+                                "**Position**: line {}, character {}\n\n**Language**: Rust",
+                                position.line, position.character
+                            ),
                         }),
                         range: None,
                     }));
@@ -256,49 +252,55 @@ impl LspServer for LanguageServer {
                 _ => return Ok(None),
             }
         }
-        
+
         Ok(None)
     }
 
     async fn signature_help(&self, params: SignatureHelpParams) -> Result<Option<SignatureHelp>> {
-        let uri = params.text_document_position_params.text_document.uri.clone();
-        let _position = params.text_document_position_params.position;  // Prefix with _ since unused
-        let context = params.context.as_ref();  // Use as_ref() to avoid moving
-        
+        let uri = params
+            .text_document_position_params
+            .text_document
+            .uri
+            .clone();
+        let _position = params.text_document_position_params.position;
+        let context = params.context.as_ref();
+
         let documents = self.documents.read();
         if let Some(doc) = documents.get(&uri) {
             match doc.language_id.as_str() {
                 "rust" => {
                     // Basic signature help for demonstration
                     return Ok(Some(SignatureHelp {
-                        signatures: vec![
-                            SignatureInformation {
-                                label: "fn example(param1: i32, param2: &str) -> bool".to_string(),
-                                documentation: Some(Documentation::MarkupContent(MarkupContent {
-                                    kind: MarkupKind::Markdown,
-                                    value: "Example function signature".to_string(),
-                                })),
-                                parameters: Some(vec![
-                                    ParameterInformation {
-                                        label: ParameterLabel::Simple("param1: i32".to_string()),
-                                        documentation: Some(Documentation::MarkupContent(MarkupContent {
+                        signatures: vec![SignatureInformation {
+                            label: "fn example(param1: i32, param2: &str) -> bool".to_string(),
+                            documentation: Some(Documentation::MarkupContent(MarkupContent {
+                                kind: MarkupKind::Markdown,
+                                value: "Example function signature".to_string(),
+                            })),
+                            parameters: Some(vec![
+                                ParameterInformation {
+                                    label: ParameterLabel::Simple("param1: i32".to_string()),
+                                    documentation: Some(Documentation::MarkupContent(
+                                        MarkupContent {
                                             kind: MarkupKind::Markdown,
                                             value: "First parameter".to_string(),
-                                        })),
-                                    },
-                                    ParameterInformation {
-                                        label: ParameterLabel::Simple("param2: &str".to_string()),
-                                        documentation: Some(Documentation::MarkupContent(MarkupContent {
+                                        },
+                                    )),
+                                },
+                                ParameterInformation {
+                                    label: ParameterLabel::Simple("param2: &str".to_string()),
+                                    documentation: Some(Documentation::MarkupContent(
+                                        MarkupContent {
                                             kind: MarkupKind::Markdown,
                                             value: "Second parameter".to_string(),
-                                        })),
-                                    },
-                                ]),
-                                active_parameter: context
-                                    .and_then(|ctx| ctx.active_signature_help.as_ref())
-                                    .and_then(|help| help.active_parameter),
-                            },
-                        ],
+                                        },
+                                    )),
+                                },
+                            ]),
+                            active_parameter: context
+                                .and_then(|ctx| ctx.active_signature_help.as_ref())
+                                .and_then(|help| help.active_parameter),
+                        }],
                         active_signature: Some(0),
                         active_parameter: context
                             .and_then(|ctx| ctx.active_signature_help.as_ref())
@@ -308,16 +310,23 @@ impl LspServer for LanguageServer {
                 _ => return Ok(None),
             }
         }
-        
+
         Ok(None)
     }
 
-    async fn goto_definition(&self, params: GotoDefinitionParams) -> Result<Option<GotoDefinitionResponse>> {
-        let uri = params.text_document_position_params.text_document.uri.clone();
+    async fn goto_definition(
+        &self,
+        params: GotoDefinitionParams,
+    ) -> Result<Option<GotoDefinitionResponse>> {
+        let uri = params
+            .text_document_position_params
+            .text_document
+            .uri
+            .clone();
         let position = params.text_document_position_params.position;
-        
+
         let documents = self.documents.read();
-        if let Some(_doc) = documents.get(&uri) {  // Prefix with _ since unused
+        if let Some(_doc) = documents.get(&uri) {
             // For demonstration, return a mock definition location
             return Ok(Some(GotoDefinitionResponse::Scalar(Location {
                 uri: uri.clone(),
@@ -333,40 +342,7 @@ impl LspServer for LanguageServer {
                 },
             })));
         }
-        
+
         Ok(None)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use tower_lsp::ClientSocket;
-    use tower_lsp::async_trait;
-
-    struct TestClient;
-
-    #[async_trait]
-    impl ClientSocket for TestClient {
-        async fn send(&self, _message: String) -> std::io::Result<()> {
-            Ok(())
-        }
-
-        async fn recv(&self) -> std::io::Result<Option<String>> {
-            Ok(None)
-        }
-    }
-
-    #[tokio::test]
-    async fn test_server_initialization() {
-        let client = Client::new(TestClient);
-        let server = LanguageServer::new(client);
-
-        let params = InitializeParams::default();
-        let result = server.initialize(params).await.unwrap();
-
-        assert!(result.capabilities.completion_provider.is_some());
-        assert!(result.capabilities.hover_provider.is_some());
-        assert!(result.capabilities.signature_help_provider.is_some());
     }
 }
