@@ -20,7 +20,7 @@ keywords = ["editor", "text-editor", "rust"]
 
 [workspace.dependencies]
 # GUI Framework
-egui = "0.23"
+egui = "0.31"
 eframe = "0.23"
 
 # Async runtime
